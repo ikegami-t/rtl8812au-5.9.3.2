@@ -28,6 +28,23 @@ EXTRA_LDFLAGS += --strip-debug
 
 CONFIG_AUTOCFG_CP = n
 
+KVER = $(shell uname -r)
+KMAJ = $(shell echo $(KVER) | \
+       sed -e 's/^\([0-9][0-9]*\)\.[0-9][0-9]*\.[0-9][0-9]*.*/\1/')
+KMIN = $(shell echo $(KVER) | \
+       sed -e 's/^[0-9][0-9]*\.\([0-9][0-9]*\)\.[0-9][0-9]*.*/\1/')
+KREV = $(shell echo $(KVER) | \
+       sed -e 's/^[0-9][0-9]*\.[0-9][0-9]*\.\([0-9][0-9]*\).*/\1/')
+
+kver_ge = $(shell \
+	    echo test | awk '{if($(KMAJ) < $(1)) {print 0} else { \
+			      if($(KMAJ) > $(1)) {print 1} else { \
+			      if($(KMIN) < $(2)) {print 0} else { \
+			      if($(KMIN) > $(2)) {print 1} else { \
+			      if($(KREV) < $(3)) {print 0} else { print 1 } \
+			      }}}}}' \
+	   )
+
 ########################## WIFI IC ############################
 CONFIG_MULTIDRV = n
 CONFIG_RTL8188E = n
@@ -74,7 +91,11 @@ CONFIG_RTW_ADAPTIVITY_MODE = normal
 CONFIG_SIGNAL_SCALE_MAPPING = n
 CONFIG_80211W = y
 CONFIG_REDUCE_TX_CPU_LOADING = n
-CONFIG_BR_EXT = y
+ifeq ($(call kver_ge,5,15,0),1)
+	CONFIG_BR_EXT = n
+else # $(call kver_ge,5,15,0),1
+	CONFIG_BR_EXT = y
+endif # $(call kver_ge,5,15,0),1
 CONFIG_TDLS = n
 CONFIG_WIFI_MONITOR =  y
 CONFIG_MCC_MODE = n
@@ -1014,6 +1035,8 @@ endif
 endif
 
 ########### END OF PATH  #################################
+
+undefine KVER
 
 ifeq ($(CONFIG_USB_HCI), y)
 ifeq ($(CONFIG_USB_AUTOSUSPEND), y)

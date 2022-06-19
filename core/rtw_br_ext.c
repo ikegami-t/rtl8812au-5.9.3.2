@@ -17,7 +17,11 @@
 #ifdef __KERNEL__
 	#include <linux/if_arp.h>
 	#include <net/ip.h>
-	#include <net/ipx.h>
+	#include <linux/version.h>
+	#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
+	#else /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0) */
+		#include <net/ipx.h>
+	#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0) */
 	#include <linux/atalk.h>
 	#include <linux/udp.h>
 	#include <linux/if_pppox.h>
